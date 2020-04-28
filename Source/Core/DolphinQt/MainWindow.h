@@ -11,6 +11,8 @@
 #include <optional>
 #include <string>
 
+#include "TAStudio/TAStudioFrame.h"
+
 class QStackedWidget;
 class QString;
 
@@ -174,6 +176,7 @@ private:
   void OnActivateChat();
   void OnRequestGolfControl();
   void ShowTASInput();
+  void ShowTAStudio();
 
   void ChangeDisc();
   void EjectDisc();
@@ -215,6 +218,7 @@ private:
   NetPlayDialog* m_netplay_dialog;
   DiscordHandler* m_netplay_discord;
   NetPlaySetupDialog* m_netplay_setup_dialog;
+  TAStudioFrame* g_TAStudioFrame;
   static constexpr int num_gc_controllers = 4;
   std::array<GCTASInputWindow*, num_gc_controllers> m_gc_tas_input_windows{};
   static constexpr int num_wii_controllers = 4;

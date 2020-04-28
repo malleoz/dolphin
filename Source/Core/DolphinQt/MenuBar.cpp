@@ -721,6 +721,7 @@ void MenuBar::AddMovieMenu()
   connect(m_recording_read_only, &QAction::toggled, [](bool value) { Movie::SetReadOnly(value); });
 
   movie_menu->addAction(tr("TAS Input"), this, [this] { emit ShowTASInput(); });
+  movie_menu->addAction(tr("TAStudio"), this, [this] { emit ShowTAStudio(); });
 
   movie_menu->addSeparator();
 

@@ -111,6 +111,9 @@ static bool s_bPolled = false;
 static std::mutex s_input_display_lock;
 static std::string s_InputDisplay[8];
 
+static TAStudioManip s_tastudio_manip_func;
+static TAStudioReceiver s_tastudio_rec_func;
+
 static GCManipFunction s_gc_manip_func;
 static WiiManipFunction s_wii_manip_func;
 
@@ -1340,6 +1343,16 @@ void SaveRecording(const std::string& filename)
     Core::DisplayMessage(fmt::format("DTM {} saved", filename), 2000);
   else
     Core::DisplayMessage(fmt::format("Failed to save {}", filename), 2000);
+}
+
+void SetTAStudioManip(TAStudioManip func)
+{
+  s_tastudio_manip_func = func;
+}
+
+void SetTAStudioReceiver(TAStudioReceiver func)
+{
+  s_tastudio_rec_func = func;
 }
 
 void SetGCInputManip(GCManipFunction func)

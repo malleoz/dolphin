@@ -182,11 +182,16 @@ void CheckWiimoteStatus(int wiimote, const WiimoteCommon::DataReportBuilder& rpt
 std::string GetInputDisplay();
 std::string GetRTCDisplay();
 
+using TAStudioManip = std::function<void(GCPadStatus*)>;
+using TAStudioReceiver = std::function<void(GCPadStatus*)>;
+
 // Done this way to avoid mixing of core and gui code
 using GCManipFunction = std::function<void(GCPadStatus*, int)>;
 using WiiManipFunction = std::function<void(WiimoteCommon::DataReportBuilder&, int, int,
                                             const WiimoteEmu::EncryptionKey&)>;
 
+void SetTAStudioManip(TAStudioManip);
+void SetTAStudioReceiver(TAStudioReceiver);
 void SetGCInputManip(GCManipFunction);
 void SetWiiInputManip(WiiManipFunction);
 void CallGCInputManip(GCPadStatus* PadStatus, int controllerID);

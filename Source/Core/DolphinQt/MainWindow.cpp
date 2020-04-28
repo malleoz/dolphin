@@ -377,6 +377,16 @@ void MainWindow::CreateComponents()
     m_wii_tas_input_windows[i] = new WiiTASInputWindow(nullptr, i);
   }
 
+  g_TAStudioFrame = new TAStudioFrame(this);
+
+  Movie::SetTAStudioManip([this](GCPadStatus* pad_status) {
+    g_TAStudioFrame->GetInput(pad_status);
+  });
+
+  Movie::SetTAStudioReceiver([this](GCPadStatus* pad_status) {
+    g_TAStudioFrame->SetInput(pad_status);
+  });
+
   Movie::SetGCInputManip([this](GCPadStatus* pad_status, int controller_id) {
     m_gc_tas_input_windows[controller_id]->GetValues(pad_status);
   });
@@ -484,6 +494,7 @@ void MainWindow::ConnectMenuBar()
   connect(m_menu_bar, &MenuBar::StopRecording, this, &MainWindow::OnStopRecording);
   connect(m_menu_bar, &MenuBar::ExportRecording, this, &MainWindow::OnExportRecording);
   connect(m_menu_bar, &MenuBar::ShowTASInput, this, &MainWindow::ShowTASInput);
+  connect(m_menu_bar, &MenuBar::ShowTAStudio, this, &MainWindow::ShowTAStudio);
 
   // View
   connect(m_menu_bar, &MenuBar::ShowList, m_game_list, &GameList::SetListView);
@@ -1669,6 +1680,11 @@ void MainWindow::ShowTASInput()
       m_wii_tas_input_windows[i]->activateWindow();
     }
   }
+}
+
+void MainWindow::ShowTAStudio()
+{
+  g_TAStudioFrame->show();
 }
 
 void MainWindow::OnConnectWiiRemote(int id)
