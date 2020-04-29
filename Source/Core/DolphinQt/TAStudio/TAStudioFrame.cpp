@@ -18,7 +18,29 @@ TAStudioFrame::TAStudioFrame(QWidget* parent) : QDialog(parent)
     setWindowTitle(tr("TAStudio"));
   }
 
+  // Set width and height
+  setFixedWidth(600);
+  setFixedHeight(600);
 
+  // Table display
+  m_input_table = new QTableWidget(this);
+  m_input_table->setRowCount(30);  // Limit the table to display 30 rows at a time
+  m_input_table->setColumnCount(m_columnHeaders.count());
+  m_input_table->setHorizontalHeaderLabels(m_columnHeaders);
+  m_input_table->setMinimumSize(450, 580);
+
+  // Adjust column widths
+  for (int i = 0; i < m_columnHeaders.count(); i++)
+  {
+    if (m_columnHeaders[i] == tr("Frame"))
+    {
+      m_input_table->resizeColumnToContents(i);
+    }
+    else
+    {
+      m_input_table->setColumnWidth(i, 10);
+    }
+  }
 
   /*wxFlexGridSizer* fgSizer;
   fgSizer = new wxFlexGridSizer(0, 2, 0, 0);

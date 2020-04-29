@@ -12,6 +12,7 @@
 
 #include <QDialog>
 #include <QCheckBox>
+#include <QTableWidget>
 
 #include "Core/Movie.h"
 #include "MainWindow.h"
@@ -51,24 +52,9 @@ private:
     COLUMN_C_X,
     COLUMN_C_Y
   };
-  const std::vector<wxString> COLUMN_LABEL = {"Input", "VI", "aX", "aY", "A",  "B",  "X",
-                                              "Y",     "S",  "Z",  "L",  "R",  "La", "Ra",
-                                              "dU",    "dD", "dL", "dR", "cX", "cY"};
-  std::vector<TAStudioInput> m_inputVector;
+  
   u64 m_firstInputInGrid;
   int m_gridNumberOfRows;
-  wxDECLARE_EVENT_TABLE();
-
-public:
-  InputGrid(wxWindow* parent);
-  void OnSelectCell(wxGridEvent& evt);
-  void UpdateGridValues(bool groupByVI);
-  void AddInputToVector(u64 frameCount, u64 inputCount, GCPadStatus* input, bool groupByVI);
-  GCPadStatus GetInputAtRow(u64 inputFrame);
-  void DeleteInputAtRow(int row);
-  void SetInputAtRow(int row, TAStudioInput tastudioInput);
-  GCPadStatus GetInputAtInputFrame(int inputFrame);
-  int GetTAStudioInputVectorSize();
 };*/
 
 class TAStudioFrame : public QDialog
@@ -82,6 +68,14 @@ protected:
   wxCheckBox* m_sendInputsToDolphin;
   wxCheckBox* m_groupByVI;*/
   QString movieName;
+  QTableWidget* m_input_table;
+  QStringList m_columnHeaders = {
+    tr("Frame"), tr("aX"), tr("aY"), tr("A"), tr("B"),
+    tr("X"), tr("Y"), tr("S"), tr("Z"), tr("L"), tr("R"),
+    tr("La"), tr("Ra"), tr("dU"), tr("dD"), tr("dL"),
+    tr("dR"), tr("cX"), tr("cY")
+  };
+  std::vector<TAStudioInput> m_inputVector;
 
 public:
   /*TAStudioFrame(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("TAStudio"),
