@@ -11,8 +11,10 @@
 #include <vector>
 
 #include <QDialog>
+#include <QCheckBox>
 
 #include "Core/Movie.h"
+#include "MainWindow.h"
 
 #include "InputCommon/GCPadStatus.h"
 
@@ -79,12 +81,14 @@ protected:
   // wxTextCtrl* m_currentInput;
   wxCheckBox* m_sendInputsToDolphin;
   wxCheckBox* m_groupByVI;*/
+  QString movieName;
 
 public:
   /*TAStudioFrame(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("TAStudio"),
                 const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
                 long style = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);*/
   TAStudioFrame(QWidget* parent);
+  void GetMovieName(QString name);
   void GetInput(GCPadStatus* PadStatus);
   void SetInput(GCPadStatus* PadStatus);
 };

@@ -100,6 +100,7 @@
 #include "DolphinQt/TAS/WiiTASInputWindow.h"
 #include "DolphinQt/ToolBar.h"
 #include "DolphinQt/WiiUpdate.h"
+#include "DolphinQt/TAStudio/TAStudioFrame.h"
 
 #include "InputCommon/ControllerInterface/ControllerInterface.h"
 
@@ -1568,6 +1569,8 @@ void MainWindow::OnPlayRecording()
 
   if (dtm_file.isEmpty())
     return;
+
+  g_TAStudioFrame->GetMovieName(dtm_file);
 
   if (!Movie::IsReadOnly())
   {

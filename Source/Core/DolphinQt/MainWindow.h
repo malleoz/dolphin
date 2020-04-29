@@ -11,8 +11,6 @@
 #include <optional>
 #include <string>
 
-#include "TAStudio/TAStudioFrame.h"
-
 class QStackedWidget;
 class QString;
 
@@ -44,6 +42,7 @@ class SettingsWindow;
 class ToolBar;
 class WatchWidget;
 class WiiTASInputWindow;
+class TAStudioFrame;
 
 namespace DiscIO
 {

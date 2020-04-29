@@ -6,18 +6,17 @@
 
 #include "TAStudioFrame.h"
 
-    /*
-      TODO:
-      - SetInput was implemented with the assumption that we can index the TAStudioInput vector
-      based on input count. Thus, we need to make sure that on savestate load, the vector is updated
-      with all of the savestate's previous inputs up to the frame of the savestate
-    */
-
 TAStudioFrame::TAStudioFrame(QWidget* parent) : QDialog(parent)
 {
   // build GUI here
-  setWindowTitle(tr("TAStudio"));
-
+  if (Movie::IsPlayingInput())
+  {
+    setWindowTitle(tr("TAStudio") + tr(" - ") + movieName);
+  }
+  else
+  {
+    setWindowTitle(tr("TAStudio"));
+  }
 
 
 
@@ -55,6 +54,10 @@ TAStudioFrame::TAStudioFrame(QWidget* parent) : QDialog(parent)
   fgSizer->Fit(this);*/
 }
 
+void TAStudioFrame::GetMovieName(QString name)
+{
+  movieName = name;
+}
 void TAStudioFrame::GetInput(GCPadStatus* PadStatus)
 {
 
