@@ -28,17 +28,6 @@ namespace PyScripting
 
 static PyThreadState* InitMainPythonInterpreter()
 {
-#ifdef _WIN32
-  static const std::wstring python_home = UTF8ToWString(File::GetExeDirectory()) + L"/python-embed";
-  static const std::wstring python_path =
-      UTF8ToWString(File::GetCurrentDir()) + L";" +
-      UTF8ToWString(File::GetExeDirectory()) + L"/python-embed/python38.zip;" +
-      UTF8ToWString(File::GetExeDirectory()) + L"/python-embed;" +
-      UTF8ToWString(File::GetExeDirectory()) + L";" +
-      UTF8ToWString(File::GetUserPath(D_MODULES_IDX)) + L";" +
-      UTF8ToWString(File::GetUserPath(D_SCRIPTS_IDX)) + L";";
-#endif
-
   if (PyImport_AppendInittab("dolio_stdout", PyInit_dolio_stdout) == -1)
     ERROR_LOG_FMT(SCRIPTING, "failed to add dolio_stdout to builtins");
   if (PyImport_AppendInittab("dolio_stderr", PyInit_dolio_stderr) == -1)
@@ -61,16 +50,22 @@ static PyThreadState* InitMainPythonInterpreter()
   if (PyImport_AppendInittab("dolphin", PyInit_dolphin) == -1)
     ERROR_LOG_FMT(SCRIPTING, "failed to add dolphin to builtins");
 
-#ifdef _WIN32
-  Py_SetPythonHome(const_cast<wchar_t*>(python_home.c_str()));
-  Py_SetPath(python_path.c_str());
-#endif
-  INFO_LOG_FMT(SCRIPTING, "Initializing embedded python... {}", Py_GetVersion());
-  std::string scriptPath = File::GetUserPath(D_SCRIPTS_IDX);
   PyConfig config;
   PyConfig_InitPythonConfig(&config);
 
-  PyConfig_SetString(&config, &config.pythonpath_env, std::wstring(scriptPath.begin(), scriptPath.end()).c_str());
+  static const std::wstring python_home = UTF8ToWString(File::GetExeDirectory()) + L"/python-embed";
+  static const std::wstring python_zip = python_home + L"/python38.zip";
+  static const std::wstring modules_dir = UTF8ToWString(File::GetUserPath(D_MODULES_IDX));
+  static const std::wstring scripts_dir = UTF8ToWString(File::GetUserPath(D_SCRIPTS_IDX));
+
+  PyConfig_SetString(&config, &config.home, python_home.c_str());
+  PyWideStringList_Append(&config.module_search_paths, python_zip.c_str());
+  PyWideStringList_Append(&config.module_search_paths, modules_dir.c_str());
+  PyWideStringList_Append(&config.module_search_paths, scripts_dir.c_str());
+  config.module_search_paths_set = 1;
+
+  INFO_LOG_FMT(SCRIPTING, "Initializing embedded python... {}", Py_GetVersion());
+  std::string scriptPath = File::GetUserPath(D_SCRIPTS_IDX);
   
   Py_InitializeFromConfig(&config);
 
