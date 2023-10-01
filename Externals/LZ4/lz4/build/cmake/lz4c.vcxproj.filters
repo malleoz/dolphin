@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\GitHub\dolphin-felk\Externals\LZ4\lz4\programs\bench.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\dolphin-felk\Externals\LZ4\lz4\programs\lz4cli.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\dolphin-felk\Externals\LZ4\lz4\programs\lz4io.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\dolphin-felk\Externals\LZ4\lz4\programs\datagen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\GitHub\dolphin-felk\Externals\LZ4\lz4\build\cmake\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{27639208-2FBF-3E18-80BD-80BFD3506283}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

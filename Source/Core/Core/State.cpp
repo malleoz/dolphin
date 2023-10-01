@@ -16,7 +16,7 @@
 
 #include <fmt/format.h>
 
-#include <lzo/lzo1x.h>
+#include <lz4/lib/lz4.h>
 
 #include "Common/ChunkFile.h"
 #include "Common/CommonTypes.h"
@@ -49,23 +49,6 @@
 
 namespace State
 {
-#if defined(__LZO_STRICT_16BIT)
-static const u32 IN_LEN = 8 * 1024u;
-#elif defined(LZO_ARCH_I086) && !defined(LZO_HAVE_MM_HUGE_ARRAY)
-static const u32 IN_LEN = 60 * 1024u;
-#else
-static const u32 IN_LEN = 128 * 1024u;
-#endif
-
-static const u32 OUT_LEN = IN_LEN + (IN_LEN / 16) + 64 + 3;
-
-static unsigned char __LZO_MMODEL out[OUT_LEN];
-
-#define HEAP_ALLOC(var, size)                                                                      \
-  lzo_align_t __LZO_MMODEL var[((size) + (sizeof(lzo_align_t) - 1)) / sizeof(lzo_align_t)]
-
-static HEAP_ALLOC(wrkmem, LZO1X_1_MEM_COMPRESS);
-
 static AfterLoadCallbackFunc s_on_after_load_callback;
 
 // Temporary undo state buffer
@@ -389,32 +372,28 @@ static void CompressAndDumpState(CompressAndDumpState_args& save_args)
 
   if (header.size != 0)  // non-zero header size means the state is compressed
   {
-    lzo_uint i = 0;
+    u32 bytes_compressed = 0;
+
     while (true)
     {
-      lzo_uint32 cur_len = 0;
-      lzo_uint out_len = 0;
+      u32 bytes_to_compress = std::min((u32)LZ4_MAX_INPUT_SIZE, header.size - bytes_compressed);
+      char* out = new char[bytes_to_compress];
+      u32 out_len = LZ4_compress_default((char*)buffer_data + bytes_compressed, out,
+                                         bytes_to_compress, bytes_to_compress);
 
-      if ((i + IN_LEN) >= buffer_size)
-      {
-        cur_len = (lzo_uint32)(buffer_size - i);
-      }
-      else
-      {
-        cur_len = IN_LEN;
-      }
-
-      if (lzo1x_1_compress(buffer_data + i, cur_len, out, &out_len, wrkmem) != LZO_E_OK)
-        PanicAlertFmtT("Internal LZO Error - compression failed");
+      if (out_len == 0)
+        PanicAlertFmtT("Internal LZ4 Error - compression failed");
 
       // The size of the data to write is 'out_len'
-      f.WriteArray((lzo_uint32*)&out_len, 1);
+      f.WriteArray(&out_len, 1);
       f.WriteBytes(out, out_len);
 
-      if (cur_len != IN_LEN)
-        break;
+      delete out;
 
-      i += cur_len;
+      bytes_compressed += bytes_to_compress;
+
+      if (bytes_compressed == header.size)
+        break;
     }
   }
   else  // uncompressed
@@ -601,27 +580,36 @@ static void LoadFileStateData(const std::string& filename, std::vector<u8>& ret_
 
     buffer.resize(header.size);
 
-    lzo_uint i = 0;
+    u32 total_bytes_read = 0;
     while (true)
     {
-      lzo_uint32 cur_len = 0;  // number of bytes to read
-      lzo_uint new_len = 0;    // number of bytes to write
+      u32 compressed_data_len;
+      f.ReadArray(&compressed_data_len, 1);
 
-      if (!f.ReadArray(&cur_len, 1))
-        break;
+      char* compressed_data = new char[compressed_data_len];
+      f.ReadBytes(compressed_data, compressed_data_len);
 
-      f.ReadBytes(out, cur_len);
-      const int res = lzo1x_decompress(out, cur_len, &buffer[i], &new_len, nullptr);
-      if (res != LZO_E_OK)
+      // We need to specify the output buffer's size for safety. This may exceed the positive bound
+      // of int, causing the buffer size to be interpreted as a negative value.
+      u32 max_decompress_size = std::min((u32)LZ4_MAX_INPUT_SIZE, header.size - total_bytes_read);
+
+      int bytes_read = LZ4_decompress_safe(compressed_data, (char*)buffer.data() + total_bytes_read,
+                                           compressed_data_len, max_decompress_size);
+
+      delete compressed_data;
+
+      if (bytes_read < 0)
       {
-        // This doesn't seem to happen anymore.
-        PanicAlertFmtT("Internal LZO Error - decompression failed ({0}) ({1}, {2}) \n"
+        PanicAlertFmtT("Internal LZ4 Error - decompression failed ({0}, {1}, {2}) \n"
                        "Try loading the state again",
-                       res, i, new_len);
+                       bytes_read, compressed_data_len, header.size);
         return;
       }
 
-      i += new_len;
+      total_bytes_read += bytes_read;
+
+      if (total_bytes_read == header.size)
+        break;
     }
   }
   else  // uncompressed
@@ -738,9 +726,6 @@ void SetOnAfterLoadCallback(AfterLoadCallbackFunc callback)
 
 void Init()
 {
-  if (lzo_init() != LZO_E_OK)
-    PanicAlertFmtT("Internal LZO Error - lzo_init() failed");
-
   s_save_thread.Reset("Savestate Worker", [](CompressAndDumpState_args args) {
     CompressAndDumpState(args);
 
